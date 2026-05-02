@@ -69,59 +69,92 @@ Before you begin, ensure you have:
 ```bash
 git clone https://github.com/emrul11/AINewsFeed.git
 cd AiNewsFeed
-2. Configure your database connection
-Open appsettings.json and update the connection string:
-JSON
-Copy
+```
+
+### 2. Configure your database connection
+
+Open `appsettings.json` and update the connection string:
+
+```json
 "ConnectionStrings": {
   "DefaultConnection": "Server=YOUR_SERVER\\SQLEXPRESS;Database=AiNewsFeedDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
 }
-Replace YOUR_SERVER\\SQLEXPRESS with your actual SQL Server instance name.
-💡 Tip: If using SQL Server Express locally, it's usually localhost\\SQLEXPRESS or EMRUL\\SQLEXPRESS.
-3. Restore packages & build
-bash
-Copy
+```
+
+Replace `YOUR_SERVER\\SQLEXPRESS` with your actual SQL Server instance name.
+
+> 💡 **Tip:** If using SQL Server Express locally, it's usually `localhost\\SQLEXPRESS` or `EMRUL\\SQLEXPRESS`.
+
+### 3. Restore packages & build
+
+```bash
 dotnet restore
 dotnet build
-4. Run database migrations (EF Core will auto-create & seed)
-bash
-Copy
+```
+
+### 4. Run database migrations (EF Core will auto-create & seed)
+
+```bash
 dotnet ef database update
-If dotnet ef is not found: dotnet tool install --global dotnet-ef
-5. Run the application
-bash
-Copy
+```
+
+> If `dotnet ef` is not found: `dotnet tool install --global dotnet-ef`
+
+### 5. Run the application
+
+```bash
 dotnet run
-6. Open in browser
-Navigate to: https://localhost:5001 or http://localhost:5000
-🗄️ Database Setup
+```
+
+### 6. Open in browser
+
+Navigate to: `https://localhost:5001` or `http://localhost:5000`
+
+---
+
+## 🗄️ Database Setup
+
 The application uses EF Core Code-First with automatic seeding:
-Table
-Entity	Description
-FeedSource	17 pre-seeded AI news RSS sources
-Article	Fetched articles with metadata
+
+| Entity     | Description                       |
+| ---------- | --------------------------------- |
+| FeedSource | 17 pre-seeded AI news RSS sources |
+| Article    | Fetched articles with metadata    |
+
 On first run, EF Core will:
-Create the AiNewsFeedDb database
-Apply migrations
-Seed all 17 feed sources
-⚙️ Configuration
-appsettings.json
-Table
-Setting	Description
-ConnectionStrings:DefaultConnection	SQL Server connection string
-Logging:LogLevel	Console/file logging levels
-Environment-Specific Settings
-Create appsettings.Development.json (gitignored) for local overrides:
-JSON
-Copy
+
+1. Create the `AiNewsFeedDb` database
+2. Apply migrations
+3. Seed all 17 feed sources
+
+---
+
+## ⚙️ Configuration
+
+### appsettings.json
+
+| Setting                               | Description                  |
+| ------------------------------------- | ---------------------------- |
+| `ConnectionStrings:DefaultConnection` | SQL Server connection string |
+| `Logging:LogLevel`                    | Console/file logging levels  |
+
+### Environment-Specific Settings
+
+Create `appsettings.Development.json` (gitignored) for local overrides:
+
+```json
 {
   "ConnectionStrings": {
     "DefaultConnection": "Server=EMRUL\\SQLEXPRESS;Database=AiNewsFeedDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
   }
 }
-📁 Project Structure
-plain
-Copy
+```
+
+---
+
+## 📁 Project Structure
+
+```text
 AiNewsFeed/
 ├── Controllers/          # API controllers (Articles, Feeds)
 ├── Models/               # Domain entities (FeedSource, Article)
@@ -135,47 +168,79 @@ AiNewsFeed/
 ├── appsettings.json      # Configuration template
 ├── Program.cs            # App startup & DI
 └── AiNewsFeed.csproj     # Project file
-🔌 API Endpoints
-Table
-Method	Endpoint	Description
-GET	/api/articles	List all articles
-GET	/api/articles/{id}	Get article by ID
-GET	/api/feeds	List all feed sources
-POST	/api/feeds/refresh	Trigger manual refresh
-GET	/api/feeds/status	Get fetch status
-🐛 Troubleshooting
-❌ "Login failed for user" or connection errors
-Verify SQL Server is running
-Check Windows Authentication is enabled
-Ensure TrustServerCertificate=True is in the connection string
-Try Server=localhost\\SQLEXPRESS or Server=. or Server=(localdb)\\MSSQLLocalDB
-❌ "dotnet ef" command not found
-bash
-Copy
-dotnet tool install --global dotnet-ef
-❌ Frontend not loading articles
-Check browser console for CORS errors
-Verify API is running on expected port
-Check appsettings.json has valid connection string
-❌ Spinner doesn't stop on refresh
-Fix: In wwwroot/js/app.js, ensure isRefreshing flag is reset in both .then() and .catch() of the fetch promise.
-See inline comment in the file for the exact patch.
-🤝 Contributing
-This project is open for contributions! Areas to help:
-[ ] Fix refresh spinner bug
-[ ] Add unit tests
-[ ] Support for custom RSS feed URLs
-[ ] Docker support
-[ ] Dark mode toggle
-Fork the repo
-Create a feature branch: git checkout -b feature/my-feature
-Commit your changes
-Push and open a Pull Request
-📄 License
-This project is licensed under the MIT License.
-🙏 Acknowledgments
-CodeHollow.FeedReader — RSS/Atom parsing
-Polly — Resilience policies
-Bootstrap 5 — UI framework
-Built with ❤️ at Masco Group Bangladesh
 ```
+
+---
+
+## 🔌 API Endpoints
+
+| Method | Endpoint             | Description            |
+| ------ | -------------------- | ---------------------- |
+| GET    | `/api/articles`      | List all articles      |
+| GET    | `/api/articles/{id}` | Get article by ID      |
+| GET    | `/api/feeds`         | List all feed sources  |
+| POST   | `/api/feeds/refresh` | Trigger manual refresh |
+| GET    | `/api/feeds/status`  | Get fetch status       |
+
+---
+
+## 🐛 Troubleshooting
+
+### ❌ "Login failed for user" or connection errors
+
+- Verify SQL Server is running
+- Check Windows Authentication is enabled
+- Ensure `TrustServerCertificate=True` is in the connection string
+- Try `Server=localhost\\SQLEXPRESS` or `Server=.` or `Server=(localdb)\\MSSQLLocalDB`
+
+### ❌ "dotnet ef" command not found
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+### ❌ Frontend not loading articles
+
+- Check browser console for CORS errors
+- Verify API is running on expected port
+- Check `appsettings.json` has valid connection string
+
+### ❌ Spinner doesn't stop on refresh
+
+**Fix:** In `wwwroot/js/app.js`, ensure `isRefreshing` flag is reset in both `.then()` and `.catch()` of the fetch promise.  
+See inline comment in the file for the exact patch.
+
+---
+
+## 🤝 Contributing
+
+This project is open for contributions! Areas to help:
+
+- [ ] Fix refresh spinner bug
+- [ ] Add unit tests
+- [ ] Support for custom RSS feed URLs
+- [ ] Docker support
+- [ ] Dark mode toggle
+
+1. Fork the repo
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes
+4. Push and open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+
+---
+
+## 🙏 Acknowledgments
+
+- [CodeHollow.FeedReader](https://github.com/codehollow/FeedReader) — RSS/Atom parsing
+- [Polly](https://github.com/App-vNext/Polly) — Resilience policies
+- [Bootstrap 5](https://getbootstrap.com/) — UI framework
+
+---
+
+_Built with ❤️ at Masco Group Bangladesh_
