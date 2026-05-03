@@ -1,9 +1,9 @@
 # 🤖 AiNewsFeed
 
-A lightweight, local RSS aggregator for AI news built with **ASP.NET Core 8**, **Entity Framework Core**, and **Bootstrap 5**.
+A smart, local RSS aggregator for AI news built with **ASP.NET Core 8**, **Entity Framework Core**, and **Bootstrap 5**. Automatically extracts model names (Kimi K2.6, Claude Opus, Codex 5.5, GPT-5, etc.) and companies from article text for intelligent filtering.
 
-> **Status:** ✅ Functional — fetches & displays articles from 17 seeded AI news sources.  
-> **Pending:** Spinner bugfix on refresh button (JavaScript `isRefreshing` flag).
+> **Status:** ✅ Functional — fetches & displays articles from **55+ curated sources** including RSS, Reddit, Hacker News, ArXiv, and Google News RSS.  
+> **Smart Tags:** Auto-detects AI models and companies mentioned in each article.
 
 ---
 
@@ -17,6 +17,7 @@ A lightweight, local RSS aggregator for AI news built with **ASP.NET Core 8**, *
 - [Configuration](#configuration)
 - [Project Structure](#project-structure)
 - [API Endpoints](#api-endpoints)
+- [Source Types](#source-types)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [License](#license)
@@ -25,12 +26,21 @@ A lightweight, local RSS aggregator for AI news built with **ASP.NET Core 8**, *
 
 ## ✨ Features
 
-- 📰 Aggregates AI news from **17 curated RSS sources**
-- ⚡ Async feed fetching with **Polly** resilience policies
+- 📰 Aggregates AI news from **55+ curated sources**
+  - **Official blogs:** Moonshot AI, Anthropic, OpenAI, DeepMind, Meta AI, Mistral, Cohere, NVIDIA, Hugging Face
+  - **Tech news:** MIT Technology Review, Wired, The Verge, TechCrunch, VentureBeat, Ars Technica
+  - **Research:** ArXiv (CS.AI, CS.LG, CS.CL, CS.CV), BAIR, Microsoft Research
+  - **Community:** Reddit (r/LocalLLaMA, r/MachineLearning), Hacker News Algolia
+  - **News aggregators:** Google News RSS for specific model queries
+- 🏷️ **Auto-extracts** model names and companies from article text
+- 🔍 **Smart filters:** Filter by Source, Model, Company, Unread status, or full-text search
+- 🎨 Clean **Bootstrap 5** dark-themed frontend with real-time refresh
+- ⚡ Async feed fetching with **Polly** resilience policies (3 retries with exponential backoff)
 - 🗄️ **EF Core + SQL Server** with automatic database seeding
-- 🎨 Clean **Bootstrap 5** frontend with real-time refresh
-- 🔍 Search and filter articles
 - 🔄 One-click refresh with loading spinner
+- 🧹 Automatic soft-delete of articles older than retention period
+- 🔗 URL normalization (strip UTM params, force HTTPS, deduplication)
+- 📊 Source health tracking (auto-disable feeds after consecutive failures)
 
 ---
 
@@ -77,13 +87,13 @@ Open `appsettings.json` and update the connection string:
 
 ```json
 "ConnectionStrings": {
-  "DefaultConnection": "Server=YOUR_SERVER\\SQLEXPRESS;Database=AiNewsFeedDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  "DefaultConnection": "Server=YOUR_SERVER\SQLEXPRESS;Database=AiNewsFeedDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
 }
 ```
 
-Replace `YOUR_SERVER\\SQLEXPRESS` with your actual SQL Server instance name.
+Replace `YOUR_SERVER\SQLEXPRESS` with your actual SQL Server instance name.
 
-> 💡 **Tip:** If using SQL Server Express locally, it's usually `localhost\\SQLEXPRESS` 
+> 💡 **Tip:** If using SQL Server Express locally, it's usually `localhost\SQLEXPRESS`
 
 ### 3. Restore packages & build
 
@@ -110,22 +120,24 @@ dotnet run
 
 Navigate to: `https://localhost:5001` or `http://localhost:5000`
 
+> The frontend is served as a static SPA from `wwwroot/`. API endpoints are available at `/api/*`.
+
 ---
 
 ## 🗄️ Database Setup
 
 The application uses EF Core Code-First with automatic seeding:
 
-| Entity     | Description                       |
-| ---------- | --------------------------------- |
-| FeedSource | 17 pre-seeded AI news RSS sources |
-| Article    | Fetched articles with metadata    |
+| Entity     | Description                                              |
+| ---------- | -------------------------------------------------------- |
+| FeedSource | 55+ pre-seeded AI news sources (RSS, Reddit, HN, etc.)   |
+| Article    | Fetched articles with metadata, model tags, company tags |
 
 On first run, EF Core will:
 
 1. Create the `AiNewsFeedDb` database
 2. Apply migrations
-3. Seed all 17 feed sources
+3. Seed all 55+ feed sources with proper categorization and keyword filters
 
 ---
 
@@ -138,6 +150,18 @@ On first run, EF Core will:
 | `ConnectionStrings:DefaultConnection` | SQL Server connection string |
 | `Logging:LogLevel`                    | Console/file logging levels  |
 
+### Feed Settings (optional)
+
+Add to `appsettings.json` to customize fetch behavior:
+
+```json
+"FeedSettings": {
+  "DelayBetweenRequestsMs": 500,
+  "MaxConsecutiveFailures": 5,
+  "ArticleRetentionDays": 90
+}
+```
+
 ### Environment-Specific Settings
 
 Create `appsettings.Development.json` (gitignored) for local overrides:
@@ -145,7 +169,7 @@ Create `appsettings.Development.json` (gitignored) for local overrides:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=..\\SQLEXPRESS;Database=AiNewsFeedDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    "DefaultConnection": "Server=..\SQLEXPRESS;Database=AiNewsFeedDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
   }
 }
 ```
@@ -156,15 +180,30 @@ Create `appsettings.Development.json` (gitignored) for local overrides:
 
 ```text
 AiNewsFeed/
-├── Controllers/          # API controllers (Articles, Feeds)
-├── Models/               # Domain entities (FeedSource, Article)
+├── Controllers/          # API controllers (Articles, Feeds, Sources)
+│   ├── ArticlesController.cs
+│   ├── FeedsController.cs
+│   └── SourcesController.cs
+├── Models/               # Domain entities
+│   ├── Article.cs
+│   ├── FeedSource.cs
+│   └── Enums.cs          # FeedSourceType, SourcePriority
 ├── DTOs/                 # Data transfer objects
+│   ├── ArticleResponseDto.cs
+│   ├── FeedSourceResponseDto.cs
+│   ├── FeedRefreshResponseDto.cs
+│   └── UpdateReadStatusRequestDto.cs
 ├── Data/                 # DbContext & migrations
-├── Services/             # Business logic (FeedFetchService, etc.)
+│   └── AppDbContext.cs
+├── Services/             # Business logic
+│   ├── IFeedFetcherService.cs
+│   └── FeedFetcherService.cs
 ├── wwwroot/              # Static frontend files
-│   ├── index.html        # Main UI
-│   ├── css/              # Bootstrap + custom styles
-│   └── js/               # Frontend logic
+│   ├── index.html        # Main SPA shell
+│   ├── css/
+│   │   └── style.css     # Custom dark theme styles
+│   └── js/
+│       └── app.js        # Frontend logic
 ├── appsettings.json      # Configuration template
 ├── Program.cs            # App startup & DI
 └── AiNewsFeed.csproj     # Project file
@@ -174,13 +213,57 @@ AiNewsFeed/
 
 ## 🔌 API Endpoints
 
-| Method | Endpoint             | Description            |
-| ------ | -------------------- | ---------------------- |
-| GET    | `/api/articles`      | List all articles      |
-| GET    | `/api/articles/{id}` | Get article by ID      |
-| GET    | `/api/feeds`         | List all feed sources  |
-| POST   | `/api/feeds/refresh` | Trigger manual refresh |
-| GET    | `/api/feeds/status`  | Get fetch status       |
+### Articles
+
+| Method | Endpoint                     | Description                          |
+| ------ | ---------------------------- | ------------------------------------ |
+| GET    | `/api/articles`              | List articles (paginated, filterable) |
+| GET    | `/api/articles/models`       | Get all detected models with counts  |
+| GET    | `/api/articles/companies`    | Get all detected companies with counts |
+| PATCH  | `/api/articles/{id}/read`    | Mark single article read/unread      |
+| PATCH  | `/api/articles/read-all`     | Mark all articles as read            |
+
+#### Query Parameters for `/api/articles`
+
+| Parameter | Type   | Description                          |
+| --------- | ------ | ------------------------------------ |
+| `source`  | string | Filter by feed source name           |
+| `model`   | string | Filter by mentioned model (e.g. `kimi-k2.6`) |
+| `company` | string | Filter by mentioned company (e.g. `moonshot`) |
+| `unread`  | bool   | Show only unread articles            |
+| `search`  | string | Full-text search in title/summary    |
+| `page`    | int    | Page number (default: 1)             |
+| `pageSize`| int    | Items per page (default: 50, max: 100) |
+
+### Feeds
+
+| Method | Endpoint             | Description              |
+| ------ | -------------------- | ------------------------ |
+| POST   | `/api/feeds/refresh` | Trigger manual refresh   |
+
+### Sources
+
+| Method | Endpoint       | Description              |
+| ------ | -------------- | ------------------------ |
+| GET    | `/api/sources` | List all feed sources    |
+
+---
+
+## 📡 Source Types
+
+The fetcher supports multiple source types, each handled differently:
+
+| Type        | Examples                              | Notes                                      |
+| ----------- | ------------------------------------- | ------------------------------------------ |
+| `Rss`       | Tech blogs, research labs, arXiv      | Standard RSS/Atom parsing                  |
+| `GoogleNews`| Google News RSS search feeds          | Keyword-targeted news aggregation          |
+| `RedditJson`| r/LocalLLaMA, r/MachineLearning       | Reddit JSON API (no auth required)         |
+| `HackerNews`| HN Algolia search                     | Community discussions about AI models      |
+
+Each source can have:
+- **Priority:** Critical → High → Medium → Low (affects fetch order)
+- **RequiredKeywords:** Comma-separated filter — only articles matching these keywords are ingested
+- **AlwaysInclude:** Bypass keyword filter (useful for official model announcement blogs)
 
 ---
 
@@ -191,7 +274,7 @@ AiNewsFeed/
 - Verify SQL Server is running
 - Check Windows Authentication is enabled
 - Ensure `TrustServerCertificate=True` is in the connection string
-- Try `Server=localhost\\SQLEXPRESS` or `Server=.` or `Server=(localdb)\\MSSQLLocalDB`
+- Try `Server=localhost\SQLEXPRESS` or `Server=.` or `Server=(localdb)\MSSQLLocalDB`
 
 ### ❌ "dotnet ef" command not found
 
@@ -204,11 +287,19 @@ dotnet tool install --global dotnet-ef
 - Check browser console for CORS errors
 - Verify API is running on expected port
 - Check `appsettings.json` has valid connection string
+- Ensure `wwwroot/index.html`, `css/style.css`, and `js/app.js` exist
 
-### ❌ Spinner doesn't stop on refresh
+### ❌ Model/Company dropdowns are empty
 
-**Fix:** In `wwwroot/js/app.js`, ensure `isRefreshing` flag is reset in both `.then()` and `.catch()` of the fetch promise.  
-See inline comment in the file for the exact patch.
+- Ensure you ran `dotnet ef database update` after adding new fields
+- Click **Refresh** button to fetch new articles (old articles won't have tags)
+- Check `/api/articles/models` and `/api/articles/companies` in browser — they should return JSON objects
+
+### ❌ Feed sources failing repeatedly
+
+- Some RSS feeds change URLs or block automated requests
+- Failed sources are automatically disabled after 5 consecutive failures
+- Check logs or `/api/sources` to see `lastErrorMessage` for each source
 
 ---
 
@@ -216,11 +307,13 @@ See inline comment in the file for the exact patch.
 
 This project is open for contributions! Areas to help:
 
-- [ ] Fix refresh spinner bug
-- [ ] Add unit tests
-- [ ] Support for custom RSS feed URLs
+- [ ] Add more RSS sources or custom feed URL support
+- [ ] Add PostgreSQL / SQLite support
+- [ ] Add unit tests for FeedFetcherService
 - [ ] Docker support
-- [ ] Dark mode toggle
+- [ ] Add email/Slack/Discord notifications for new articles matching specific models
+- [ ] Add article bookmarking / favorites
+- [ ] Add sentiment analysis or summarization
 
 1. Fork the repo
 2. Create a feature branch: `git checkout -b feature/my-feature`
@@ -240,6 +333,7 @@ This project is licensed under the [MIT License](LICENSE).
 - [CodeHollow.FeedReader](https://github.com/codehollow/FeedReader) — RSS/Atom parsing
 - [Polly](https://github.com/App-vNext/Polly) — Resilience policies
 - [Bootstrap 5](https://getbootstrap.com/) — UI framework
+- [Bootstrap Icons](https://icons.getbootstrap.com/) — Icon set
 
 ---
 
