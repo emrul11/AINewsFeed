@@ -1,6 +1,6 @@
 @AiNewsFeed_HostAddress = http://localhost:5173
 
-GET {{AiNewsFeed_HostAddress}}/weatherforecast/
+GET {{AiNewsFeed_HostAddress}}/Articles/
 Accept: application/json
 
 ###
