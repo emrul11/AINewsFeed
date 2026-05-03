@@ -5,34 +5,28 @@ namespace AiNewsFeed.Models;
 
 public class Article
 {
-    [Key]
     public int Id { get; set; }
-
-    [Required]
-    [MaxLength(500)]
     public string Title { get; set; } = string.Empty;
-
     public string? Summary { get; set; }
-
     public string? Content { get; set; }
-
-    [Required]
-    [MaxLength(1000)]
     public string Url { get; set; } = string.Empty;
-
-    [Required]
-    [MaxLength(100)]
     public string Source { get; set; } = string.Empty;
-
-    [MaxLength(200)]
     public string? Author { get; set; }
-
-    [Required]
     public DateTime PublishedAt { get; set; }
-
     public DateTime FetchedAt { get; set; }
+    public bool IsRead { get; set; }
+    public bool IsDeleted { get; set; }
 
-    public bool IsRead { get; set; } = false;
+    // NEW: Extracted model/company mentions for fast filtering
+    public string? MentionedModels { get; set; }  // JSON array: ["kimi-k2.6", "claude-opus-4.6"]
+    public string? MentionedCompanies { get; set; } // JSON array: ["moonshot", "anthropic", "openai"]
 
-    public bool IsDeleted { get; set; } = false;
+    // NEW: For PostgreSQL full-text search (or keep as regular string for SQLite)
+    public string? SearchVector { get; set; }
+
+    // NEW: Content hash for deduplication
+    public string? ContentHash { get; set; }
+
+    // NEW: Original source type for provenance
+    public FeedSourceType SourceType { get; set; }
 }

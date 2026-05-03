@@ -13,4 +13,6 @@ public class ArticleResponseDto
     public DateTime FetchedAt { get; set; }
     public bool IsRead { get; set; }
     public bool IsDeleted { get; set; }
+    public string? MentionedModels { get; set; }
+    public string? MentionedCompanies { get; set; }
 }
