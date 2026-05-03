@@ -83,7 +83,7 @@ Open `appsettings.json` and update the connection string:
 
 Replace `YOUR_SERVER\\SQLEXPRESS` with your actual SQL Server instance name.
 
-> 💡 **Tip:** If using SQL Server Express locally, it's usually `localhost\\SQLEXPRESS` or `EMRUL\\SQLEXPRESS`.
+> 💡 **Tip:** If using SQL Server Express locally, it's usually `localhost\\SQLEXPRESS` 
 
 ### 3. Restore packages & build
 
@@ -145,7 +145,7 @@ Create `appsettings.Development.json` (gitignored) for local overrides:
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=EMRUL\\SQLEXPRESS;Database=AiNewsFeedDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
+    "DefaultConnection": "Server=..\\SQLEXPRESS;Database=AiNewsFeedDb;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true"
   }
 }
 ```

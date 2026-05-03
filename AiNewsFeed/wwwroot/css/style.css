@@ -1,0 +1,158 @@
+﻿:root {
+    --bs-body-bg: #0f1115;
+    --bs-body-color: #e0e0e0;
+    --card-bg: #1a1d24;
+    --border-color: #2a2e3a;
+    --accent: #0d6efd;
+    --accent-hover: #0b5ed7;
+}
+
+body {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.navbar {
+    background-color: #161920 !important;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.article-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+    .article-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+.article-title {
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    line-height: 1.4;
+}
+
+    .article-title:hover {
+        color: var(--accent);
+    }
+
+    .article-title.unread {
+        color: #fff;
+    }
+
+    .article-title.read {
+        color: #8b92a8;
+        font-weight: 400;
+    }
+
+.source-badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.35em 0.65em;
+    border-radius: 6px;
+}
+
+.model-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25em 0.5em;
+    border-radius: 4px;
+    background-color: #2d1b4e;
+    color: #c084fc;
+    border: 1px solid #4c1d95;
+}
+
+.company-badge {
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.25em 0.5em;
+    border-radius: 4px;
+    background-color: #1e3a2f;
+    color: #34d399;
+    border: 1px solid #065f46;
+}
+
+.summary-text {
+    color: #9ca3af;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.date-text {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+.filter-bar {
+    background-color: #161920;
+    border-bottom: 1px solid var(--border-color);
+    padding: 1rem 0;
+    position: sticky;
+    top: 56px;
+    z-index: 100;
+}
+
+.form-select,
+.form-control {
+    background-color: #1a1d24;
+    border-color: var(--border-color);
+    color: #e0e0e0;
+}
+
+    .form-select:focus,
+    .form-control:focus {
+        background-color: #1a1d24;
+        border-color: var(--accent);
+        color: #e0e0e0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+.toast-container {
+    z-index: 1060;
+}
+
+.toast {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+.content-expand {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+    .content-expand.show {
+        max-height: 1000px;
+    }
+
+#loadMoreBtn {
+    display: none;
+}
+
+    #loadMoreBtn.visible {
+        display: inline-block;
+    }
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bs-body-bg);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3a3f4b;
+    border-radius: 4px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #4a5060;
+    }
